@@ -1,10 +1,10 @@
 ﻿@model WallShop.Models.Category
 
-<form method="post" asp-action="Create">
+<form method="post" asp-action="DeletePost">       <!--добавили asp-action с ссылкой, так как название экшен метода не совпадает с названием представления(POST-DELETE)-->
+    <input asp-for="Id" hidden />                  <!--чтобы Id можно было использовать в методе POST-EDIT-->
     <div class="border p-3">
-        @*<div asp-validation-summary="ModelOnly" class="text-danger"></div>*@  <!--tag-helpers для валидации(проверки данных) только моделей-->
         <div class="form-group row">
-            <h2 class="text-info pl-3">Add Category</h2>
+            <h2 class="text-info pl-3">Delete Category</h2>
         </div>
 
         <div class="row">
@@ -14,8 +14,7 @@
                         <label asp-for="Name"></label>
                     </div>
                     <div class="col-8">
-                        <input asp-for="Name" class="form-control" />
-                        <span asp-validation-for="Name" class="text-danger"></span>                 <!--в этом месте будут отображаться сообщения об ошибках для Name-->
+                        <input asp-for="Name" disabled class="form-control" />          <!--disabled делает поля недопустимые для ввода-->
                     </div>
 
                 </div>
@@ -24,8 +23,7 @@
                         <label asp-for="DisplayOrder"></label>
                     </div>
                     <div class="col-8">
-                        <input asp-for="DisplayOrder" class="form-control" />
-                        <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+                        <input asp-for="DisplayOrder" disabled class="form-control" />
                     </div>
 
                 </div>
@@ -33,7 +31,7 @@
                     <div class="col-8 offset-4 row">
 
                         <div class="col">
-                            <input type="submit" class="btn btn-info w-100" value="Create" />
+                            <input type="submit" class="btn btn-danger w-100" value="Delete" />
                         </div>
                         <div class="col">
                             <a asp-action="Index" class="btn btn-success w-100">Back</a>
@@ -47,10 +45,12 @@
         </div>
     </div>
 
-</form> 
+</form>
 
 @section Scripts{      <!--раздел для скриптов куда можно добвлять любой код js-->
 
-    @{<partial name="_ValidationScriptsPartial" /> }      <!--скрипт автоматически выполняет проверку данных на стороне клиента(без предачи данных на сервер)-->
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }      <!--скрипт автоматически выполняет проверку данных на стороне клиента(без предачи данных на сервер)-->
 
 }
