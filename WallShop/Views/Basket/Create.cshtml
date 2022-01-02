@@ -15,6 +15,7 @@
                     </div>
                     <div class="col-8">
                         <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
 
                 </div>
@@ -36,4 +37,12 @@
         </div>
     </div>
 
-</form> 
+</form>
+
+@section Scripts{      <!--раздел для скриптов куда можно добвлять любой код js-->
+
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }      <!--скрипт автоматически выполняет проверку данных на стороне клиента(без предачи данных на сервер)-->
+
+}

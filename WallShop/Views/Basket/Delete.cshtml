@@ -1,0 +1,49 @@
+﻿@model WallShop.Models.Basket
+
+<form method="post" asp-action="DeletePost">
+    <!--добавили asp-action с ссылкой, так как название экшен метода не совпадает с названием представления(POST-DELETE)-->
+    <input asp-for="Id" hidden />                  <!--чтобы Id можно было использовать в методе POST-EDIT-->
+    <div class="border p-3">
+        <div class="form-group row">
+            <h2 class="text-info pl-3">Delete Basket</h2>
+        </div>
+
+        <div class="row">
+            <div class="col-8">
+                <div class="form-group row">
+                    <div class="col-4">
+                        <label asp-for="Name"></label>
+                    </div>
+                    <div class="col-8">
+                        <input asp-for="Name" disabled class="form-control" />          <!--disabled делает поля недопустимые для ввода-->
+                    </div>
+
+                </div>
+                
+                <div class="form-group row">
+                    <div class="col-8 offset-4 row">
+
+                        <div class="col">
+                            <input type="submit" class="btn btn-danger w-100" value="Delete" />
+                        </div>
+                        <div class="col">
+                            <a asp-action="Index" class="btn btn-success w-100"><i class="fas fa-sign-out-alt"></i> Back</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                @* Keep this empty *@
+            </div>
+        </div>
+    </div>
+
+</form>
+
+@section Scripts{      <!--раздел для скриптов куда можно добвлять любой код js-->
+
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }      <!--скрипт автоматически выполняет проверку данных на стороне клиента(без предачи данных на сервер)-->
+
+}

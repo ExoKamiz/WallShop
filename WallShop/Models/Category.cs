@@ -14,7 +14,7 @@ namespace WallShop.Models
         [Required]                       //обязательное заполнение этого поля 
         public string Name { get; set; }
 
-        [DisplayName("Display Oreder")]  //для разделения слова
+        [DisplayName("Display Order")]  //для разделения слова
         [Required]                       //обязательное заполнение этого поля 
         [Range(1,int.MaxValue,ErrorMessage ="Display order must be greater than 0")] //задаем что DisplayOrder не будет меньше 0
         public int DisplayOrder { get; set; }
