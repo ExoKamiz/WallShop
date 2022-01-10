@@ -17,5 +17,6 @@ namespace WallShop.Data
         public DbSet<Category> Category{ get; set; } //создаем таблицу Category в БД
 
         public DbSet<Basket> Basket{ get; set; }
+        public DbSet<Product> Product{ get; set; }
     }
 }
