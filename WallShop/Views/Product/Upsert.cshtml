@@ -1,15 +1,15 @@
-﻿@model WallShop.Models.Product
+﻿@model WallShop.Models.ViewModels.ProductVM
 
-@{ 
-    var title = "Create Product";           <!--временная переманная; изначально наша страница установленна для создания -->
+@{
+    var title = "Create Product"; <!--временная переманная; изначально наша страница установленна для создания -->
 }
 
 <form method="post" enctype="multipart/form-data">
     <!--добавляем enctype="multipart/form-data" для работы с изображениями-->
-    @if (Model.Id != 0)
-    {                                   <!--в случае создания нового товара id не будет определенно, для этого добавляем проверку -->
-        title = "Edit Product";         <!--в случае ненулевого значения id, title меняется на Edit-->
-        <input asp-for="Id" hidden /> <!--чтобы Id можно было использовать в методе POST-EDIT-->
+    @if (Model.Product.Id != 0)
+    {<!--в случае создания нового товара id не будет определенно, для этого добавляем проверку -->
+        title = "Edit Product"; <!--в случае ненулевого значения id, title меняется на Edit-->
+        <input asp-for="Product.Id" hidden /> <!--чтобы Id можно было использовать в методе POST-EDIT-->
     }
     <div class="border p-3">
         <div class="form-group row">
@@ -20,32 +20,33 @@
             <div class="col-8">
                 <div class="form-group row">
                     <div class="col-4">
-                        <label asp-for="Name"></label>
+                        <label asp-for="Product.Name"></label>
                     </div>
                     <div class="col-8">
-                        <input asp-for="Name" class="form-control" />
-                        <span asp-validation-for="Name" class="text-danger"></span>                 <!--в этом месте будут отображаться сообщения об ошибках для Name(валидация)-->
+                        <input asp-for="Product.Name" class="form-control" />
+                        <span asp-validation-for="Product.Name" class="text-danger"></span>                 <!--в этом месте будут отображаться сообщения об ошибках для Name(валидация)-->
                     </div>
 
                 </div>
                 <div class="form-group row">
                     <div class="col-4">
-                        <label asp-for="Price"></label>
+                        <label asp-for="Product.Price"></label>
                     </div>
                     <div class="col-8">
-                        <input asp-for="Price" class="form-control" />
-                        <span asp-validation-for="Price" class="text-danger"></span>
+                        <input asp-for="Product.Price" class="form-control" />
+                        <span asp-validation-for="Product.Price" class="text-danger"></span>
                     </div>
 
                 </div>
 
                 <div class="form-group row">
                     <div class="col-4">
-                        <label asp-for="Description"></label>
+                        <label asp-for="Product.Description"></label>
                     </div>
                     <div class="col-8">
-                        <input asp-for="Description" class="form-control" />
-                        <span asp-validation-for="Description" class="text-danger"></span>
+                        @*textarea определяет многострочный элемент управления текстовым вводом. В конце добавили summernote для использования*@
+                        <textarea asp-for="Product.Description" class="form-control summernote"></textarea>
+                        <span asp-validation-for="Product.Description" class="text-danger"></span>
                     </div>
 
                 </div>
@@ -60,22 +61,25 @@
 
                 </div>
 
-                @*<div class="form-group row">
+                <div class="form-group row">
+                    @*выпадающий список*@
                     <div class="col-4">
-                        <label asp-for="Description"></label>
+                        <label asp-for="Product.CategoryId"></label>
                     </div>
                     <div class="col-8">
-                        <input asp-for="Description" class="form-control" />
-                        <span asp-validation-for="Description" class="text-danger"></span>
+                        <select asp-for="Product.CategoryId" asp-items="@Model.CategorySelectList" class="form-control">
+                            <option disabled selected>--Select Category--</option>
+                        </select>
+                        <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
                     </div>
 
-                </div>*@
+                </div>
 
                 <div class="form-group row">
                     <div class="col-8 offset-4 row">
 
                         <div class="col">
-                            @if (Model.Id != 0)
+                            @if (Model.Product.Id != 0)
                             {
                                 //Update
                                 <input type="submit" class="btn btn-info w-100" value="Update" />
@@ -106,5 +110,25 @@
     @{
         <partial name="_ValidationScriptsPartial" />
     }      <!--скрипт автоматически выполняет проверку данных на стороне клиента(без предачи данных на сервер)-->
+
+    <script>
+        $(document).ready(function () {         //добавляем скипт summernote
+            $('.summernote').summernote({       
+                heigh:250                       //добавиили настраиваемые свойства
+            });
+        });
+
+        function validateInput() {          //создаем JS функцию
+            if (document.getElementById("uploadBox").value == "") {  //uploadBox для загрузки файлов или фотографий на веб-страницу
+                Swal.fire(                                          //если файл не загружен, то нам выдает ошибку
+                    'Error!',
+                    'Please upload an Image!',
+                    'error'
+                )
+                return false;
+            }
+            return true;
+        }
+    </script>
 
 }

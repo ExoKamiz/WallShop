@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WallShop.Data;
 using WallShop.Models;
+using WallShop.Models.ViewModels;
 
 namespace WallShop.Controllers
 {
@@ -35,20 +37,41 @@ namespace WallShop.Controllers
         //GET - UPSERT
         public IActionResult Upsert(int? id)      //универсальный метод для создания и редактирования; если запрос на редактирование, то int, если на создание, то null(поэтому свойство может не иметь значения)
         {
-            Product product = new Product();      //создаем новый обьект product типа Product 
-            if(id == null)                        //и проверяем что, если id которое мы получили не имеет значения, то поступил запрос на создание новой сущности
+            //IEnumerable<SelectListItem> CategoryDropDown = _db.Category.Select(i => new SelectListItem      //для передачи списка всех Category из контролера в представление(SelectListItem для раскрывающегося списка)
+            //{                                                                                               //и выьираем имя и id категории и конвертируем в элементы специального типа для выбора
+            //    Text = i.Name,
+            //    Value = i.Id.ToString()
+            //});
+
+            ////ViewBag.CategoryDropDown = CategoryDropDown;        //передаем CategoryDropDown нашему View c помощью ViewBag для вывода на экран
+            //ViewData["CategoryDropDown"] = CategoryDropDown; 
+
+            //Product product = new Product();      //создаем новый обьект product типа Product 
+
+            ProductVM productVM = new ProductVM()   //загружаем ViewModel типа ProductVM
             {
-                return View(product);             //переход на представление со ссылкой на модель
+                Product = new Product(),            //с добавлением пустого обьекта Product
+                CategorySelectList = _db.Category.Select(i => new SelectListItem      //для передачи списка всех Category из контролера в представление(SelectListItem для раскрывающегося списка)
+                {                                                                                               //и выбираем имя и id категории и конвертируем в элементы специального типа для выбора
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                })
+            };
+
+
+            if (id == null)                        //и проверяем что, если id которое мы получили не имеет значения, то поступил запрос на создание новой сущности
+            {
+                return View(productVM);             //переход на представление со ссылкой на модель
             }
             else                                  //если id имеет значение 
             {
-                product = _db.Product.Find(id);   //получаем Product из базы данных используя Find     
-                if(id == null)
+                productVM.Product = _db.Product.Find(id);   //получаем productVM из базы данных используя Find     
+                if(productVM.Product == null)
                 {
                     return NotFound();
                 }
-                return View(product);
-            }
+                return View(productVM);
+            }                                      //теперь наше представление строго типизированно с помощью productVM
         }
 
         //POST - UPSERT

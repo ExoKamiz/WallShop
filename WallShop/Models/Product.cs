@@ -14,11 +14,11 @@ namespace WallShop.Models
         public int Id { get; set; }
 
         [Required]
-        public int Name { get; set; }
-        public int Description { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
 
         [Range(1, int.MaxValue)]
-        public int Price { get; set; }
+        public double Price { get; set; }
         public string Image { get; set; }
 
         //создаем внешний ключ с идентификатором сущности Category
