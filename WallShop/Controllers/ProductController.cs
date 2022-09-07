@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using WallShop.Data;
@@ -14,10 +16,19 @@ namespace WallShop.Controllers
     {
 
         private readonly ApplicationDbContext _db;
+        private readonly IWebHostEnvironment _webHostEnvironment;    
+            //IHostingEnvironment этот интерфейс предлагает ряд свойств, с помощью которых мы можем получить информацию об окружении:
+            //ApplicationName: возвращает имя приложения
+            //EnvironmentName: возвращает описание среды, в которой хостируется приложение
+            //ContentRootPath: возвращает путь к корневой папке приложения
+            //WebRootPath: возвращает путь к папке, в которой хранится статический контент приложения, как правило, это папка wwwroot
+            //ContentRootFileProvider: возвращает реализацию интерфейса Microsoft.AspNetCore.FileProviders.IFileProvider, которая может использоваться для чтения файлов из папки ContentRootPath
+            //WebRootFileProvider: возвращает реализацию интерфейса Microsoft.AspNetCore.FileProviders.IFileProvider, которая может использоваться для чтения файлов из папки WebRootPath
 
-        public ProductController(ApplicationDbContext db)
+        public ProductController(ApplicationDbContext db, IWebHostEnvironment webHostEnvironment)
         {
             _db = db; //дает доступ к базе данных в обекте _db
+            _webHostEnvironment = webHostEnvironment;       //получаем webHostEnvironment с помощью внедрения зависимостей
         }
 
         public IActionResult Index()
@@ -77,15 +88,45 @@ namespace WallShop.Controllers
         //POST - UPSERT
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Upsert(Category obj) //тут получаем обьект который нужно добавить в бд
+        public IActionResult Upsert(ProductVM productVM) //тут получаем обьект который нужно добавить в бд
         {
             if (ModelState.IsValid)               //проверяет выполнены ли все правила которые вы определили для своей модели; валидация со стороны сервера
-            {
-                _db.Category.Add(obj);
+            {   
+                //если новое изображение загружено - нам нужно его получить
+                var files = HttpContext.Request.Form.Files;     //сохраним загруженное нами изображение в files, извлекая его с помощью HttpContext
+                                                                //класс HttpRequest позволяет ASP.NET считывать значения HTTP, отправляемые клиентом во время веб-запроса
+                                                                //Form олучает коллекцию переменных формы, Files получает коллекцию загруженных с клиента файлов
+                string webRootPath = _webHostEnvironment.WebRootPath;   //записывает в переменную путь к папке wwwroot
+
+                if(productVM.Product.Id == 0)           //проверим эта функция для создания или обновления(есть ли изображение); если 0, то необъодим код для создания новой сущности  
+                {
+                    //Creating
+                    string upload = webRootPath + WC.ImagePath; //получаем путь в папку в которой будут храниться файлы с картинками
+                    string fileName = Guid.NewGuid().ToString();    //GUID — это 128-разрядное целое число (16 байт), которое можно использовать во всех компьютерах и сетях,
+                                                                    //где требуется уникальный идентификатор. Такой идентификатор имеет очень низкую вероятность дублирования.
+                    string extension = Path.GetExtension(files[0].FileName);    //получаем разрешение файла присваивая значения файла который был загружен;
+                                                                                //Path - это строка, предоставляющая расположение файла или каталога, GetExtension - определяет, включает ли путь расширение имени файла
+                    //скопируем файл в новое место которое определяется значением upload
+                    using (var fileStream = new FileStream(Path.Combine(upload, fileName + extension), FileMode.Create))    //добавлем встроенный класс, с экземпляром класса FileStream(исп. для управления файлами);
+                                                                                                                            //Combine - объединяет две строки в путь; FileMode - указывает, каким образом операционная система должна открыть файл
+                    {
+                        files[0].CopyTo(fileStream);
+                    }
+                    //обновляем ссылку на Image внутри сущности Product указав новый путь для доступа
+                    productVM.Product.Image = fileName + extension;
+
+                    _db.Product.Add(productVM.Product); //добавляем новый товар
+
+                }
+                else
+                {
+                    //Updating
+                }
+
                 _db.SaveChanges();
                 return RedirectToAction("Index"); //перенаправление исполнение кода в метод Index
             }
-            return View(obj);
+            return View();
         }
 
         //GET - DELETE
