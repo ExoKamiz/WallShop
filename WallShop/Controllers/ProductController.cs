@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using WallShop.Data;
 using WallShop.Models;
 using WallShop.Models.ViewModels;
@@ -120,7 +120,43 @@ namespace WallShop.Controllers
                 }
                 else
                 {
+                    //bool Func(Product u)          //лямда 
+                    //{
+                    //    if (u.Id == x)
+                    //    {
+                    //        return true;
+                    //    }
+                    //    return false;
+                    //}
                     //Updating
+                    var objFromDb = _db.Product.AsNoTracking().FirstOrDefault(u => u.Id == productVM.Product.Id); //получаем актуальную сущность Product из Db на основе Id
+                                                                                                                  //добавляем AsNoTracking чтобы EF не путалось что обновляеть и не выдавало ошибки, так как он не может отслеживать одни и теже обьекты(у обоих одинаковые ключи)
+                                                                                                                  //так как мы обновляем нашу бд в конце, а тут нам обновление не нужно, а просто получение из дб 
+                    if (files.Count > 0)       //проверяем на наличие файла 
+                    {
+                        string upload = webRootPath + WC.ImagePath; 
+                        string fileName = Guid.NewGuid().ToString();  
+                        string extension = Path.GetExtension(files[0].FileName);
+                                                                                        //прежде нам нужно удалить старый файл
+                        var oldFile = Path.Combine(upload, objFromDb.Image);        //обьеденим путь и название старого файла 
+                            
+                        if (System.IO.File.Exists(oldFile))             //удалим старый файл 
+                        {
+                            System.IO.File.Delete(oldFile);
+                        }
+
+                        using (var fileStream = new FileStream(Path.Combine(upload, fileName + extension), FileMode.Create))    
+                        {
+                            files[0].CopyTo(fileStream);
+                        }
+
+                        productVM.Product.Image = fileName + extension;     //после перемещения сохраним ссылку на изображение и добавим ссылку на св-во Image
+                    }
+                    else
+                    {
+                        productVM.Product.Image = objFromDb.Image;      //если фото не менялось, оставим его таким же
+                    }
+                    _db.Product.Update(productVM.Product);      //обновляем дб
                 }
 
                 _db.SaveChanges();
