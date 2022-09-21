@@ -33,14 +33,14 @@ namespace WallShop.Controllers
 
         public IActionResult Index()
         {
-            IEnumerable<Product> objList = _db.Product; //создаем список типа IEnumerable обьектов Product и присваем обьект для получения катигории из нашей бд
-
-            foreach(var obj in objList)
-            {
-                obj.Category = _db.Category.FirstOrDefault(u => u.Id == obj.CategoryId); //из всех имеющихся сущностей Product будет извлечена и присвоенна модель Category на основе этого условия;
-                                                                                         //в этом условии(FirstOrDefault) будет работать принцип - сколько бы записей не излвлекалось, обьекту Category
-                                                                                         //будет присвоенна только первая
-            };
+            IEnumerable<Product> objList = _db.Product.Include(u=>u.Category); //создаем список типа IEnumerable обьектов Product и присваем обьект для получения катигории из нашей бд
+                                                                               //использовали Eager Loading для упрощения программы
+            //foreach(var obj in objList)
+            //{
+            //    obj.Category = _db.Category.FirstOrDefault(u => u.Id == obj.CategoryId); //из всех имеющихся сущностей Product будет извлечена и присвоенна модель Category на основе этого условия;
+            //                                                                             //в этом условии(FirstOrDefault) будет работать принцип - сколько бы записей не излвлекалось, обьекту Category
+            //                                                                             //будет присвоенна только первая
+            //};
 
             return View(objList);
         }
@@ -161,8 +161,14 @@ namespace WallShop.Controllers
 
                 _db.SaveChanges();
                 return RedirectToAction("Index"); //перенаправление исполнение кода в метод Index
+                productVM.CategorySelectList = _db.Category.Select(i => new SelectListItem      //если состояние модели не действительно, то мы не заполняем снова св-во VM, поэтому чтобы не было проблем
+                {                                                                               //передаем выподающий список еще раз, для ситуаций когда модель еще невалидна
+                                                                                                //ТАК НУЖНО ДЕЛАТЬ ВСЕГДА КОГДА ПЫТАЕМСЯ ПЕРЕДАТЬ ЧТО-ТО И ПОЛУЧАЕМ СООБЩЕНИЕ ОБ ОШИБКЕ(СКОРЕЕ ВСЕГО ПРОБЛЕМА В ВАЛИДНОСТИ МОДЕЛИ)
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                });
             }
-            return View();
+            return View(productVM);
         }
 
         //GET - DELETE
@@ -172,29 +178,44 @@ namespace WallShop.Controllers
             {
                 return NotFound();
             }
-            var obj = _db.Category.Find(id);      //получаем обьект Category из базы данных используя Find(работает только с полем имеющим первичный ключ) для искомого id
+            Product product = _db.Product.Include(u=>u.Category).FirstOrDefault(u=>u.Id==id);      //используем Eager Loading(жадная загрузка - категория автоматически 
+                                                                                                   //загружается когда мы загружаем продукт); должны были испольщовать Where,
+                                                                                                   //но испольщовали FoD, тк как вызываем только одну сущность продукт
+            //product.Category = _db.Category.Find(product.CategoryId);       //извлекаем категорию из сущности продукт
 
-            if (obj == null)
+            if (product == null)
             {
                 return NotFound();
             }
 
-            return View(obj);
+            return View(product);
         }
 
         //POST - DELETE
-        [HttpPost]
+        [HttpPost,ActionName("Delete")]         //добавляем ActionName чтобы .net core знал что удалять
         [ValidateAntiForgeryToken]
         public IActionResult DeletePost(int? id) //тут получаем обьект который нужно добавить в бд
         {
-            var obj = _db.Category.Find(id);
-            if(obj == null)                      //тут не нужна валидация, а только проверка определен ли обьект
+            var obj = _db.Product.Find(id);
+              
+            if (obj == null)                      //тут не нужна валидация, а только проверка определен ли обьект
             {
                 return NotFound();
             }
-                _db.Category.Remove(obj);
-                _db.SaveChanges();
-                return RedirectToAction("Index"); //перенаправление исполнение кода в метод Index
+
+            string webRootPath = _webHostEnvironment.WebRootPath;
+            string upload = webRootPath + WC.ImagePath;
+
+            var fileForDelate = Path.Combine(upload, obj.Image);
+
+            if (System.IO.File.Exists(fileForDelate))             //удалим старый файл 
+            {
+                System.IO.File.Delete(fileForDelate);
+            }
+
+            _db.Product.Remove(obj);
+            _db.SaveChanges();
+            return RedirectToAction("Index"); //перенаправление исполнение кода в метод Index
         }
     }
 }

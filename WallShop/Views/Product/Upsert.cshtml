@@ -28,6 +28,18 @@
                     </div>
 
                 </div>
+
+                <div class="form-group row">
+                    <div class="col-4">
+                        <label asp-for="Product.ShortDesc"></label>
+                    </div>
+                    <div class="col-8">
+                        <input asp-for="Product.ShortDesc" class="form-control" />
+                        <span asp-validation-for="Product.ShortDesc" class="text-danger"></span>                 <!--в этом месте будут отображаться сообщения об ошибках для Name(валидация)-->
+                    </div>
+
+                </div>
+
                 <div class="form-group row">
                     <div class="col-4">
                         <label asp-for="Product.Price"></label>
@@ -99,7 +111,10 @@
             </div>
             <div class="col-4">
                 @* Keep this empty *@
-                <img src="@WC.ImagePath@Model.Product.Image" width="100%" style="border-radius:5px; border:1px solid #bbb"/>
+                @if (Model.Product.Id != 0)     //проверяем загруженно ли фото, тк только при выполнении этого условия фото выводится на экран
+                {
+                    <img src="@WC.ImagePath@Model.Product.Image" width="100%" style="border-radius:5px; border:1px solid #bbb" />
+                }
             </div>
         </div>
     </div>
