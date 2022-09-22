@@ -1,0 +1,15 @@
+﻿//зостаем VM так как нам надо передать на страницу Home сразу две модели 
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace WallShop.Models.ViewModels
+{
+    public class HomeVM
+    {
+        public IEnumerable<Product> Products { get; set; }
+        public IEnumerable<Category> Categories { get; set; } 
+    }
+}
