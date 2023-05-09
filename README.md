@@ -34,7 +34,7 @@ MS SQL Server: The database management system used for storing and retrieving da
 
 To get started with the Wallpaper Shop project, follow these steps:
 
-Clone the repository: git clone https://github.com/your-username/wallpaper-shop.git
+Clone the repository: git clone https://github.com/ExoKamiz/WallShop.git
 Install the necessary dependencies by running dotnet restore.
 Configure the connection string in the appsettings.json file to connect to your MS SQL Server instance.
 Run the database migrations using dotnet ef database update.
